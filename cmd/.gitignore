@@ -1,0 +1,26 @@
+# Environment
+.env
+
+# Build files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build
+main
+app
+bin/
+
+# Go test
+*.test
+coverage.out
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
