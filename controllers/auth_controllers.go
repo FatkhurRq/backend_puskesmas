@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/fath/puskesmas-backend/config"
 	"github.com/fath/puskesmas-backend/dto"
 	"github.com/fath/puskesmas-backend/models"
 	"github.com/fath/puskesmas-backend/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
 type RegisterInput struct {
@@ -133,21 +134,51 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	userResponse := dto.PatientResponse{
+		ID:    user.ID,
+		NIK:   user.NIK,
+		Name:  user.Name,
+		Phone: user.Phone,
+		Role:  user.Role,
+	}
+
 	c.JSON(http.StatusOK, dto.APIResponse{
 		Success: true,
 		Message: "Login success",
-		Data:    gin.H{"token": token},
+		Data: gin.H{
+			"token": token,
+			"user":  userResponse,
+		},
 	})
 }
 
 func Me(c *gin.Context) {
 
 	userID, _ := c.Get("user_id")
-	role, _ := c.Get("role")
+
+	var user models.User
+	result := config.DB.Where("id = ?", userID).First(&user)
+
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, dto.APIResponse{
+			Success: false,
+			Message: "User not found",
+			Data:    nil,
+		})
+		return
+	}
+
+	userResponse := dto.PatientResponse{
+		ID:    user.ID,
+		NIK:   user.NIK,
+		Name:  user.Name,
+		Phone: user.Phone,
+		Role:  user.Role,
+	}
 
 	c.JSON(200, dto.APIResponse{
 		Success: true,
 		Message: "User data retrieved successfully",
-		Data:    gin.H{"user_id": userID, "role": role},
+		Data:    gin.H{"user": userResponse},
 	})
 }

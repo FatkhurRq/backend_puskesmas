@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/fath/puskesmas-backend/config"
 	"github.com/fath/puskesmas-backend/dto"
 	"github.com/fath/puskesmas-backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"net/http"
-	"time"
 )
 
 type RegistrationInput struct {
@@ -200,7 +201,11 @@ func GetMyRegistrations(c *gin.Context) {
 		Order("registration_date DESC").
 		Find(&registrations)
 
-	c.JSON(http.StatusOK, registrations)
+	c.JSON(http.StatusOK, dto.APIResponse{
+		Success: true,
+		Message: "Registrations retrieved successfully",
+		Data:    registrations,
+	})
 }
 
 func GetMyQueue(c *gin.Context) {
@@ -226,9 +231,9 @@ func GetMyQueue(c *gin.Context) {
 		First(&registration).Error
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.APIResponse{
-			Success: false,
-			Message: "Registration not found",
+		c.JSON(http.StatusOK, dto.APIResponse{
+			Success: true,
+			Message: "No active queue",
 			Data:    nil,
 		})
 		return
@@ -241,9 +246,9 @@ func GetMyQueue(c *gin.Context) {
 		First(&queue).Error
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.APIResponse{
-			Success: false,
-			Message: "Queue not found",
+		c.JSON(http.StatusOK, dto.APIResponse{
+			Success: true,
+			Message: "No active queue",
 			Data:    nil,
 		})
 		return
@@ -257,7 +262,7 @@ func GetMyQueue(c *gin.Context) {
 			"queue_number":      queue.QueueNumber,
 			"status":            queue.Status,
 			"patient_name":      registration.User.Name,
-			"poli":              registration.Poli.Name,
+			"poli_name":         registration.Poli.Name,
 			"registration_date": registration.RegistrationDate,
 		},
 	})
